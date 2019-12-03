@@ -1,0 +1,203 @@
+---
+title: "Toro"
+#output: html_notebook
+---
+
+```{r}
+library("TDA")
+```
+
+```{r}
+toro <- torusUnif(300, a = 1.8, c = 5)
+plot(toro)
+```
+
+
+```{r}
+Circle1 <- circleUnif(60)
+Circle2 <- circleUnif(60, r = 2) + 3
+Circles <- rbind(Circle1, Circle2)
+```
+
+```{r}
+maxscale <- 5
+maxdimension <- 2
+```
+
+```{r}
+DiagRips <- ripsDiag(X = Circles, maxdimension, maxscale, library = c("GUDHI", "Dionysus"), location = TRUE, printProgress = FALSE)
+```
+
+
+```{r}
+plot(DiagRips[["diagram"]])
+```
+
+```{r}
+par(mfrow = c(1, 2))
+plot(DiagRips[["diagram"]], main = "Alpha complex persistence diagram")
+one <- which(DiagRips[["diagram"]][, 1] == 1)
+one <- one[which.max(DiagRips[["diagram"]][one, 3] - DiagRips[["diagram"]][one, 2])]
+plot(Circles, col = 1, main = "Representative loop")
+for (i in seq(along = one)) {
+for (j in seq_len(dim(DiagRips[["cycleLocation"]][[one[i]]])[1])) {
+lines(DiagRips[["cycleLocation"]][[one[i]]][j, , ], pch = 19,
+cex = 1, col = i + 1)
+}
+}
+par(mfrow = c(1, 1))
+```
+
+```{r}
+n <- 600
+percNoise <- 0.1
+XX1 <- circleUnif(n)
+noise <- cbind(runif(percNoise * n, -2, 2), runif(percNoise * n, -2, 2))
+X <- rbind(XX1, noise)
+
+## limits of the Gird at which the density estimator is evaluated
+Xlim <- c(-2, 2)
+Ylim <- c(-2, 2)
+lim <- cbind(Xlim, Ylim)
+by <- 0.2
+
+B <- 80
+alpha <- 0.05
+
+## candidates
+parametersKDE <- seq(0.1, 0.5, by = 0.2)
+
+maxKDE <- maxPersistence(kde, parametersKDE, X, lim = lim, by = by,
+                         bandFUN = "bootstrapBand", B = B, alpha = alpha,
+                         parallel = FALSE, printProgress = TRUE)
+print(summary(maxKDE))
+
+par(mfrow = c(1,2))
+plot(X, pch = 16, cex = 0.5, main = "Circle")
+plot(maxKDE)
+
+```
+
+```{r}
+DiagGrid <- gridDiag(X = toro1, FUN = kde, h = 0.3, lim = cbind(Xlim, Ylim), by = by, sublevel = FALSE, library = "Dionysus", location = TRUE, printProgress = FALSE)
+```
+
+```{r}
+n <- 60
+percNoise <- 0.1
+toro <- torusUnif(600, a = 1.8, c = 5)
+toro1 <- torusUnif(2000, a = 3, c = 9)
+noise <- cbind(runif(percNoise * n, -2, 2), runif(percNoise * n, -2, 2),runif(percNoise * n, -2, 2))
+toro0 <- torusUnif(600, a = 1.8, c = 5)
+toro2 <- rbind(toro0, noise)
+
+```
+
+```{r}
+plot(toro)
+plot(toro1)
+plot(toro2)
+```
+```{r}
+DiagAlphaCmplx2 <- alphaComplexDiag(X = toro2, library = c("GUDHI", "Dionysus"), location = TRUE, printProgress = TRUE)
+plot(DiagAlphaCmplx2[["diagram"]], main = "Alpha complex persistence diagram")
+```
+
+
+```{r}
+DiagAlphaCmplx1 <- alphaComplexDiag(X = toro1, library = c("GUDHI", "Dionysus"), location = TRUE, printProgress = TRUE)
+plot(DiagAlphaCmplx1[["diagram"]], main = "Alpha complex persistence diagram")
+```
+```{r}
+DiagAlphaCmplx <- alphaComplexDiag(X = toro, library = c("GUDHI", "Dionysus"), location = TRUE, printProgress = TRUE)
+plot(DiagAlphaCmplx[["diagram"]], main = "Alpha complex persistence diagram")
+```
+
+```{r}
+print(bottleneck(DiagAlphaCmplx[["diagram"]], DiagAlphaCmplx1[["diagram"]], dimension = 1))
+```
+
+```{r}
+print(bottleneck(DiagAlphaCmplx[["diagram"]], DiagAlphaCmplx2[["diagram"]], dimension = 1))
+```
+
+```{r}
+print(bottleneck(DiagAlphaCmplx1[["diagram"]], DiagAlphaCmplx2[["diagram"]], dimension = 1))
+```
+
+
+```{r}
+sfera <- sphereUnif(n = 500, d = 1, r = 1)
+plot(sfera)
+```
+
+```{r}
+DiagAlphaCmplx0 <- alphaComplexDiag(X = sfera, library = c("GUDHI", "Dionysus"), location = TRUE, printProgress = TRUE)
+plot(DiagAlphaCmplx0[["diagram"]], main = "Alpha complex persistence diagram")
+```
+
+
+
+```{r}
+par(mfrow = c(1, 2))
+plot(DiagAlphaCmplx[["diagram"]], main = "Alpha complex persistence diagram")
+one <- which(DiagAlphaCmplx[["diagram"]][, 1] == 1)
+one1 <- one[which.max(DiagAlphaCmplx[["diagram"]][one, 3] - DiagAlphaCmplx[["diagram"]][one, 2])]
+plot(toro1, col = 1, main = "Representative loop")
+for (i in seq(along = one1)) {
+for (j in seq_len(dim(DiagAlphaCmplx[["cycleLocation"]][[one1[i]]])[1])) {
+lines(DiagAlphaCmplx[["cycleLocation"]][[one1[i]]][j, , ], pch = 19,
+cex = 1, col = i + 1)
+}
+}
+par(mfrow = c(1, 1))
+```
+```{r}
+par(mfrow = c(1, 2))
+plot(DiagAlphaCmplx[["diagram"]], main = "Alpha complex persistence diagram")
+one <- which(DiagAlphaCmplx[["diagram"]][, 1] == 1)
+one <- one - one1
+one2 <- one[which.max(DiagAlphaCmplx[["diagram"]][one, 3] - DiagAlphaCmplx[["diagram"]][one, 2])]
+plot(toro1, col = 1, main = "Representative loop")
+for (i in seq(along = one2)) {
+for (j in seq_len(dim(DiagAlphaCmplx[["cycleLocation"]][[one2[i]]])[1])) {
+lines(DiagAlphaCmplx[["cycleLocation"]][[one2[i]]][j, , ], pch = 19,
+cex = 1, col = i + 1)
+}
+}
+par(mfrow = c(1, 1))
+```
+
+```{r}
+plot(DiagAlphaCmplx[["diagram"]], barcode=TRUE, main = "Alpha complex barcode")
+```
+
+
+```{r}
+one <- which(DiagAlphaCmplx[["diagram"]][, 1] == 1)
+```
+
+
+
+
+```{r}
+X <- torusUnif(600, a = 1.8, c = 5)
+
+# alpha complex filtration
+FltAlphaComplex <- alphaComplexFiltration(X = X, printProgress = TRUE)
+
+# plot alpha complex filtration
+lim <- rep(c(-1, 1), 2)
+plot(NULL, type = "n", xlim = lim[1:5], ylim = lim[3:7],
+    main = "Alpha Complex Filtration Plot")
+for (idx in seq(along = FltAlphaComplex[["cmplx"]])) {
+  polygon(FltAlphaComplex[["coordinates"]][FltAlphaComplex[["cmplx"]][[idx]], , drop = FALSE],
+      col = "pink", border = NA, xlim = lim[1:5], ylim = lim[3:7])
+}
+for (idx in seq(along = FltAlphaComplex[["cmplx"]])) {
+  polygon(FltAlphaComplex[["coordinates"]][FltAlphaComplex[["cmplx"]][[idx]], , drop = FALSE],
+      col = NULL, xlim = lim[1:5], ylim = lim[3:7])
+}  
+points(FltAlphaComplex[["coordinates"]], pch = 16)
+```
+
